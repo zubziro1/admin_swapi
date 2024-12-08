@@ -26,7 +26,7 @@ function main()
 
             print("Done: " .. result .. " " .. callback .. corrid)
         else
-            print("Missing req parameters, coutn != 4 -> " .. argc)
+            print("Missing req parameters, count !=4 -> " .. argc)
         end
 
     end)
