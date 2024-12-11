@@ -4,6 +4,8 @@ AddEventHandler("OnPluginStart", function(event)
 end)
 
 AddEventHandler("OnAllPluginsLoaded", function(event)
+    db_init()
+    db_auth_loader()
     main()
     return EventResult.Continue
 end)
@@ -15,21 +17,74 @@ function main()
             local auth = args[2]
             local callback = base64_decode(args[3])
             local payload = base64_decode(args[4])
-            print("swapi req corrid: " .. corrid .. " callback " .. callback .. " payload " .. payload)
+            print("swapi req corrid: " .. corrid .. " auth " .. auth .. " callback " .. callback .. " payload " .. payload)
 
-            local headers = "-H 'Content-Type: text/plain'"
-            local data = "-d '" .. payload .. "'"
-            local command = string.format('curl -s -w "%%{http_code}" %s %s %s 2>&1', headers, data, callback .. corrid)
-            local handle = io.popen(command)
-            local result = handle:read("*a")
-            handle:close()
-
-            print("Done: " .. result .. " " .. callback .. corrid)
+            if verify_access_token(auth) then
+                execute_curl(callback, corrid, 200, "OK", base64_encode(payload))
+            else
+                print("Denied api access. Returning HTTP 401 Unauthorized.")
+                execute_curl(callback, corrid, 401, "Unauthorized: Invalid or missing access token.", nil)
+            end
         else
-            print("Missing req parameters, count !=4 -> " .. argc)
+            print("Missing req parameters, count != 4 -> " .. argc)
         end
-
     end)
+end
+
+function execute_curl(callback, corrid, status_code, message, payload)
+    local headers = "-H 'Content-Type: application/json'"
+    local data = string.format(
+        "-d '{\"code\": %d, \"message\": \"%s\", \"payload\": \"%s\"}'",
+        status_code,
+        message,
+        payload or ""
+    )
+    local command = string.format('curl -s -w "%%{http_code}" %s %s %s 2>&1', headers, data, callback .. corrid)
+    local handle = io.popen(command)
+    local result = handle:read("*a")
+    handle:close()
+    print("Curl command completed with result: " .. result)
+end
+
+function db_init()
+	db = Database(tostring(config:Fetch("admins.connection_name")))
+	if not db:IsConnected() then return end
+
+	db:QueryParams("CREATE TABLE `@tablename` (`token` varchar(128) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+    		{ tablename = "sw_swapi_auth" },
+    		function(err, result)
+    			if #result > 0 then
+    				print("Table sw_swapi_auth created ok.")
+    		    else
+                    print("Table sw_swapi_auth exists.")
+                end
+
+    		end)
+end
+
+function db_auth_loader()
+	if not db:IsConnected() then return end
+
+	auth_tokens = {}
+
+	db:QueryParams(
+		"select token from `sw_swapi_auth`",
+		{},
+		function(err, result)
+			if #err > 0 then return print("ERROR: " .. err) end
+			auth_tokens = result
+		end)
+end
+
+function verify_access_token(token)
+    for _, v in ipairs(auth_tokens) do
+        if v.token == token then
+            print("verify_access_token accept: true")
+            return true
+        end
+    end
+    print("verify_access_token accept: false")
+    return false
 end
 
 function base64_decode(data)
