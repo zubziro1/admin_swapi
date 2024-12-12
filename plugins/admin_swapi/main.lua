@@ -23,7 +23,7 @@ function main()
                     print("Invalid or missing function in payload")
                 end
 
-                execute_curl(callback, corrid, 200, "OK", base64_encode(payload))
+                execute_curl(callback, corrid, 200, "OK", nil)
             else
                 print("Denied api access. Returning HTTP 401 Unauthorized.")
                 execute_curl(callback, corrid, 401, "Unauthorized: Invalid or missing access token.", nil)
