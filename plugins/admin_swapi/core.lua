@@ -3,7 +3,7 @@ function GetPluginAuthor()
 end
 
 function GetPluginVersion()
-    return "1.0.1"
+    return "1.0.2"
 end
 
 function GetPluginName()
@@ -11,5 +11,5 @@ function GetPluginName()
 end
 
 function GetPluginWebsite()
-    return "https://dummy"
+    return "https://github.com/zubziro1/admin_swapi"
 end
