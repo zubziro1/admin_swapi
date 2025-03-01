@@ -200,11 +200,11 @@ function getPlayers(callback, corrid)
 
                     if weaponData then
                         local weaponInfo = {
-                            Id = weapon:CBasePlayerWeapon().Parent.AttributeManager.Item.ItemDefinitionIndex,
-                            Name = weaponNames[weapon:CBasePlayerWeapon().Parent.AttributeManager.Item.ItemDefinitionIndex] or "Unknown",
-                            Slot = weaponData.GearSlot,
-                            WeaponType = weaponTypes[weaponData.WeaponType] or "Unknown",
-                            WeaponCategory = weaponCategories[weaponData.WeaponCategory] or "Unknown"
+                            id = weapon:CBasePlayerWeapon().Parent.AttributeManager.Item.ItemDefinitionIndex,
+                            name = weaponNames[weapon:CBasePlayerWeapon().Parent.AttributeManager.Item.ItemDefinitionIndex] or "Unknown",
+                            slot = weaponData.GearSlot,
+                            weaponType = weaponTypes[weaponData.WeaponType] or "Unknown",
+                            weaponCategory = weaponCategories[weaponData.WeaponCategory] or "Unknown"
                         }
                         table.insert(weaponList, weaponInfo)
                     end
