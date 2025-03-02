@@ -39,6 +39,9 @@ function execute(name, callback, corrid, payload_content)
     if name == "setMap" then
         setMap(callback, corrid, payload_content)
         return
+    elseif name == "setBots" then
+        setBots(callback, corrid, payload_content)
+        return
     elseif name == "getPlayers" then
         getPlayers(callback, corrid)
         return
@@ -51,6 +54,22 @@ end
 
 function setMap(callback, corrid, payload)
     server:Execute("changelevel " .. payload["name"])
+    execute_curl(callback, corrid, 200, "OK", nil)
+end
+
+function setBots(callback, corrid, payload)
+    server:Execute("mp_autoteambalance 0")
+    server:Execute("mp_limitteams 0")
+    server:Execute("bot_kick all")
+
+    for i = 1, payload["t"] do
+        server:Execute("bot_add_t")
+    end
+
+    for i = 1, payload["ct"] do
+        server:Execute("bot_add_ct")
+    end
+
     execute_curl(callback, corrid, 200, "OK", nil)
 end
 
